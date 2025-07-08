@@ -1,6 +1,4 @@
-
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,10 +7,194 @@
   <meta name="author" content="Fitrosky" />
   <title>Eye Movement & Tracking Therapy | Fitrosky</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <!-- Remaining styles and script come from the latest HTML source -->
+  <style>
+    :root {
+      --bg: #f7f9fc;
+      --text: #222;
+      --primary: #2c3e50;
+      --secondary: #34495e;
+      --accent: #3498db;
+      --footer: #ecf0f1;
+    }
+    body.dark {
+      --bg: #1e1e1e;
+      --text: #f0f0f0;
+      --primary: #111;
+      --secondary: #222;
+      --accent: #00aced;
+      --footer: #2d2d2d;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+    }
+    header {
+      background: var(--primary);
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+    nav, .main-screen {
+      display: none;
+      background: var(--secondary);
+      padding: 0.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    nav.active, .main-screen.active {
+      display: flex;
+    }
+    nav button, .main-screen button {
+      background: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      margin: 0.5rem;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    section {
+      display: none;
+      padding: 1rem;
+    }
+    section.active {
+      display: block;
+    }
+    canvas {
+      display: block;
+      margin: 1rem auto;
+      background: white;
+      border: 1px solid #ccc;
+      touch-action: none;
+    }
+    .controls {
+      text-align: center;
+      margin-top: 1rem;
+    }
+    .controls input, .controls select {
+      margin: 0.5rem;
+    }
+    footer {
+      text-align: center;
+      padding: 1rem;
+      background: var(--footer);
+    }
+    .theme-toggle {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 0.5rem 1rem;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
 </head>
-<body>
-<!-- Placeholder. The actual full HTML content is long and will be inserted from stored doc -->
-<!-- It will be extracted from the latest version stored in the system -->
-</body>
-</html>
+<body onload="showMainScreen()">
+  <button class="theme-toggle" onclick="toggleTheme()">Toggle Theme</button>  <header>
+    <h1>Eye Movement & Tracking Therapy</h1>
+    <p>Train your vision with interactive exercises - Powered by Fitrosky</p>
+  </header>  <div class="main-screen active" id="mainScreen">
+    <button onclick="startApp()">Start Therapy</button>
+    <button onclick="showProgress()">View Progress</button>
+    <button onclick="resetProgress()">Reset Progress</button>
+    <button onclick="switchSection('guide')">User Guide</button>
+  </div>  <nav id="navBar">
+    <button onclick="switchSection('pursuits')">Pursuits</button>
+    <button onclick="switchSection('saccades')">Saccades</button>
+    <button onclick="switchSection('vergence')">Vergence</button>
+    <button onclick="switchSection('guide')">User Guide</button>
+    <button onclick="returnToMain()">Main Menu</button>
+  </nav>  <section id="progress">
+    <h2>Your Session Progress</h2>
+    <p>This device tracks your latest scores and time per module:</p>
+    <ul>
+      <li>Pursuits - Score: <span id="progressPursuitsScore">0</span>, Time: <span id="progressPursuitsTime">0</span>s</li>
+      <li>Saccades - Score: <span id="progressSaccadesScore">0</span>, Time: <span id="progressSaccadesTime">0</span>s</li>
+      <li>Vergence - Score: <span id="progressVergenceScore">0</span>, Time: <span id="progressVergenceTime">0</span>s</li>
+    </ul>
+    <button onclick="returnToMain()">Back to Menu</button>
+  </section>  <footer>
+    <p>&copy; 2025 Fitrosky | Eye Health & Vision Therapy</p>
+  </footer>  <script>
+    let scores = {}, timers = {};
+
+    function showMainScreen() {
+      document.getElementById('mainScreen').classList.add('active');
+      document.getElementById('navBar').classList.remove('active');
+    }
+
+    function startApp() {
+      document.getElementById('mainScreen').classList.remove('active');
+      document.getElementById('navBar').classList.add('active');
+      switchSection('pursuits');
+    }
+
+    function returnToMain() {
+      document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+      document.getElementById('navBar').classList.remove('active');
+      document.getElementById('mainScreen').classList.add('active');
+    }
+
+    function switchSection(id) {
+      document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+      const section = document.getElementById(id);
+      if (section) section.classList.add('active');
+    }
+
+    function showProgress() {
+      document.getElementById('mainScreen').classList.remove('active');
+      document.getElementById('navBar').classList.remove('active');
+      switchSection('progress');
+      updateProgressDisplay();
+    }
+
+    function updateProgressDisplay() {
+      const ids = ['Pursuits', 'Saccades', 'Vergence'];
+      ids.forEach(id => {
+        document.getElementById(`progress${id}Score`).textContent = localStorage.getItem(`score${id}`) || 0;
+        document.getElementById(`progress${id}Time`).textContent = localStorage.getItem(`time${id}`) || 0;
+      });
+    }
+
+    function resetProgress() {
+      const ids = ['Pursuits', 'Saccades', 'Vergence'];
+      ids.forEach(id => {
+        localStorage.removeItem(`score${id}`);
+        localStorage.removeItem(`time${id}`);
+      });
+      alert("Progress has been reset.");
+    }
+
+    function updateScore(sectionId, points) {
+      const id = sectionId.charAt(0).toUpperCase() + sectionId.slice(1);
+      scores[sectionId] = (scores[sectionId] || 0) + points;
+      document.getElementById(`score${sectionId}`).textContent = scores[sectionId];
+      localStorage.setItem(`score${id}`, scores[sectionId]);
+    }
+
+    function startTimer(sectionId) {
+      let time = 0;
+      clearInterval(timers[sectionId]);
+      timers[sectionId] = setInterval(() => {
+        time++;
+        document.getElementById(`timer${sectionId}`).textContent = time;
+        localStorage.setItem(`time${sectionId.charAt(0).toUpperCase() + sectionId.slice(1)}`, time);
+      }, 1000);
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('dark');
+      localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+    }
+
+    if (localStorage.getItem('theme') === 'dark') {
+      document.body.classList.add('dark');
+    }
+  </script></body>
+</html> 
